@@ -1,5 +1,7 @@
+import signal
+from daemon import DaemonContext
+
 from server import SBDServer, SBDHandler
-from p
 
 HOST, PORT = "localhost", 5555
 
@@ -18,4 +20,16 @@ msg = (FMT, FIELDS, SIZE)
 api = (URL, METHOD, JSON_RPC)
 
 Server = SBDServer(addr, SBDHandler, msg, api)
-Server.serve_forever()
+
+context = DaemonContext(
+	working_directory="/"
+)
+
+context.signal_map = {
+	signal.SIGTERM: Server.shutdown()
+}
+
+with context:
+	Server.serve_forever()
+
+
