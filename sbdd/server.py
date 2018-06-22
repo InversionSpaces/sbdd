@@ -2,13 +2,13 @@ import socketserver
 import json
 import requests
 
-from handler import handle
+from handler import SBDHandle
 
 class SBDServer(socketserver.TCPServer):
     allow_reuse_address = True
     
-    def __init__(self, addr, handler, msg, api):
-        super().__init__(addr, handler)
+    def __init__(self, addr, msg, api):
+        super().__init__(addr, SBDHandler)
         
         self.fmt, self.fields, self.size = msg
         self.url, self.method, self.ver  = api
@@ -20,7 +20,7 @@ class SBDHandler(socketserver.BaseRequestHandler):
         payload = (self.server.fields, self.server.fmt)
         
         self.data = self.request.recv(self.server.size)
-        self.data = handle(self.data, payload)
+        self.data = SBDHsandle(self.data, payload)
         
         headers = {"content-type": "application/json"}
         payload = {

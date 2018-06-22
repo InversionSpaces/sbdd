@@ -1,4 +1,4 @@
-def handle(binary, payload=None):
+def SBDHandle(binary, payload=None):
     from struct import unpack as un
     from struct import calcsize as calc
     from binascii import hexlify as hexy
