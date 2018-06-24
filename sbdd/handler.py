@@ -1,17 +1,15 @@
+from struct import unpack as un
+from struct import calcsize as calc
+from binascii import hexlify as hexy
+
 def SBDHandle(binary, payload=None):
-    from struct import unpack as un
-    from struct import calcsize as calc
-    from binascii import hexlify as hexy
-    
     protover = un(">B", binary[:1])[0]
     if(protover != 1):
-        print("Protocol Mismatch")
-        return
+        raise ValueError("Protocol Mismatch")
     
     overalllen = un(">h", binary[1:3])[0]
     if(overalllen + 3 != len(binary)):
-        print("Size Mismatch")
-        return
+        raise ValueError("Size Mismatch")
         
     res = {"MOHeader" : list(), 
            "MOLocationInformation" : list(),
@@ -48,15 +46,13 @@ def SBDHandle(binary, payload=None):
             case = "MOLocationInformation"
         
         else:
-            print("IEI Mismatch")
-            return
+            raise ValueError("IEI Mismatch")
         
         size = calc(fmt)
         count = lng / size
         
         if(count % 1 != 0):
-            print("Size Mismatch")
-            return
+            raise ValueError("Size Mismatch")
         
         for i in range(int(count)):
             data = list(un(fmt, binary[carret + i*size: carret + (i + 1)*size]))
