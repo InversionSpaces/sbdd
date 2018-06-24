@@ -4,6 +4,7 @@ import requests
 
 from sbdd.handler import SBDHandle
 
+
 class SBDServer(socketserver.TCPServer):
     allow_reuse_address = True
     
@@ -20,7 +21,7 @@ class SBDHandler(socketserver.BaseRequestHandler):
         payload = (self.server.fields, self.server.fmt)
         
         self.data = self.request.recv(self.server.size)
-        self.data = SBDHsandle(self.data, payload)
+        self.data = SBDHandle(self.data, payload)
         
         headers = {"content-type": "application/json"}
         payload = {
