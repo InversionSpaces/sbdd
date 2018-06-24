@@ -2,7 +2,7 @@ import socketserver
 import json
 import requests
 
-from sbdd.handler import SBDHandle
+from sbdd import SBDHandle
 
 
 class SBDServer(socketserver.TCPServer):

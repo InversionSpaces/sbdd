@@ -4,7 +4,7 @@ from daemon.pidfile import PIDLockFile
 from configparser import ConfigParser
 from signal import SIGTERM, SIGINT, SIGUSR1
 
-from sbdd.server import SBDServer
+from sbdd import SBDServer
 
 class SBDDaemon():
     def reload(self):
