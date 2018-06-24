@@ -1,6 +1,6 @@
 from __future__ import absolute_import
 from daemon import DaemonContext
-from lockfile import FileLock
+from daemon.pidfile import PIDLockFile
 from configparser import ConfigParser
 from signal import SIGTERM, SIGINT, SIGUSR1
 
@@ -24,30 +24,34 @@ class SBDDaemon():
         
         daemon = self.config["DAEMON"]
 	
-        pidfile = daemon.get("PIDFILE", fallback="/var/run/sbdd.pid")
-        self.context.pidfile = FileLock(pidfile)
+        pidfile = daemon.get("PIDFILE", fallback="sbdd.pid")
+        self.context.pidfile = PIDLockFile(pidfile)
+        
+        stdout = daemon.get("STDOUT", fallback=None)
+        if stdout: self.context.stdout = open(stdout, "w+")
+        
+        stderr = daemon.get("STDERR", fallback=None)
+        if stderr: self.context.stderr = open(stderr, "w+")
 
     def run(self):
         with self.context:
             self.server.serve_forever()
-
-    def stop(self):
+            
+    def down(self):
         self.server.shutdown()
 	
-    def __init__(self,	stdin=None, stdout=None, stderr=None,
-		config_file="sbdd.conf"):
+    def __init__(self, config_file="sbdd.conf"):      
         self.config_file = config_file        
 
         self.config = ConfigParser()
         self.context = DaemonContext()
-
-        self.reload()	
-
+                                     
         self.context.signal_map = {
-            SIGTERM: self.stop,
-            SIGINT: self.stop,
+            SIGINT: self.down,
             SIGUSR1: self.reload
 	    }
+	    
+        self.reload()	
 
 	
 
