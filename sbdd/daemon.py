@@ -3,6 +3,7 @@ from daemon import DaemonContext
 from daemon.pidfile import PIDLockFile
 from configparser import ConfigParser
 from signal import SIGTERM, SIGINT, SIGUSR1
+import os
 
 from sbdd import SBDServer
 
@@ -18,7 +19,7 @@ class SBDDaemon():
                 tuple(sbdmsg.get("FIELDS", fallback="Payload").split(",")), 
                 sbdmsg.getint("SIZE", fallback=1024))
         api  = (jsonapi.get("URL", fallback="http://127.0.0.1/api"), 
-                jsonapi.get("METHDO", fallback="push"), 
+                jsonapi.get("METHOD", fallback="pushdata"), 
                 jsonapi.get("JSON_RPC", fallback="2.0"))
         
         self.context.server = SBDServer(addr, msg, api)
@@ -41,11 +42,11 @@ class SBDDaemon():
     def down(self):
         self.context.server.shutdown()
 	
-    def __init__(self, config_file="sbdd.conf"):      
+    def __init__(self, config_file="sbdd.conf"):
         self.config_file = config_file      
 
         self.config = ConfigParser()
-        self.context = DaemonContext()
+        self.context = DaemonContext(working_directory=os.getcwd())
                                      
         self.context.signal_map = {
             SIGINT: self.down,
