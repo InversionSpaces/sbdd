@@ -1,6 +1,7 @@
 import socketserver
 import json
 import requests
+import logging
 
 from sbdd import SBDHandle
 
@@ -18,6 +19,7 @@ class SBDServer(socketserver.TCPServer):
 
 class SBDHandler(socketserver.BaseRequestHandler):
     def handle(self):
+        logging.info("Handling request")
         payload = (self.server.fields, self.server.fmt)
         
         self.data = self.request.recv(self.server.size)

@@ -3,15 +3,18 @@ import os
 from daemon import DaemonContext
 from daemon.pidfile import PIDLockFile
 from signal import SIGTERM, SIGINT, SIGUSR1
+import logging
 
 from sbdd import SBDServer
 
 class SBDDaemon():
     def run(self):
         with self.context:
+            logging.info("Daemon up")
             self.context.server.serve_forever()
             
     def down(self):
+        logging.info("Daemon down")
         self.context.server.shutdown()
 	
     def __init__(self, server, daemon):
