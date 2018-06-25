@@ -13,7 +13,7 @@ class SBDDaemon():
             logging.info("Daemon up")
             self.context.server.serve_forever()
             
-    def down(self):
+    def down(self, *args):
         logging.info("Daemon down")
         self.context.server.shutdown()
 	

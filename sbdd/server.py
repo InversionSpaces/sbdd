@@ -22,8 +22,14 @@ class SBDHandler(socketserver.BaseRequestHandler):
         logging.info("Handling request")
         payload = (self.server.fields, self.server.fmt)
         
-        self.data = self.request.recv(self.server.size)
-        self.data = SBDHandle(self.data, payload)
+        try:
+            self.data = self.request.recv(self.server.size)
+            self.data = SBDHandle(self.data, payload)
+        except Exception as e:
+            logging.error(e)
+            return
+        else:
+            logging.info(self.data)
         
         headers = {"content-type": "application/json"}
         payload = {
@@ -32,7 +38,13 @@ class SBDHandler(socketserver.BaseRequestHandler):
             "jsonrpc": self.server.ver,
             "id": self.server.reqnum,
         }
-        response = requests.post(self.server.url, data=json.dumps(payload), headers=headers).json()
+        try:
+            response = requests.post(self.server.url, data=json.dumps(payload), headers=headers).json()
+        except Exception as e:
+            logging.error(e)
+            return
+        else:
+            logging.info(response)
         
         self.server.reqnum += 1
         
