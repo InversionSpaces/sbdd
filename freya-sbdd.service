@@ -1,0 +1,25 @@
+[Unit]
+Description=gravicapa farsh
+After=network.target
+
+
+[Service]
+User=freya
+Group=freya
+
+Type=simple
+Environment="PYTHONPATH=/home/freya/freya_app/tcpapp"
+
+PIDFile=/var/run/freya-sbdd/freya-sbdd.pid
+WorkingDirectory=/home/freya/freya_app/tcpapp
+
+ExecStartPre=/bin/rm -f /var/run/freya-sbdd/freya-sbdd.pid
+ExecStartPre=/bin/mkdir -p /var/run/freya-sbdd
+ExecStartPre=/bin/chown freya:freya /var/run/freya-sbdd
+ExecStart=/home/freya/freya_app/venv/bin/python -m sbdd
+
+KillSignal=SIGTERM
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
