@@ -9,43 +9,46 @@ from sbdd import SBDHandle
 class SBDServer(socketserver.TCPServer):
     allow_reuse_address = True
     
-    def __init__(self, addr, msg, api):
+    def __init__(self, addr):
         super().__init__(addr, SBDHandler)
         
-        self.fmt, self.fields, self.size = msg
-        self.url, self.method, self.ver  = api
+        self.api = list()
+        self.payload = None 
+        self.msgsize = 4096
         self.reqnum = 0
+    
+    def setMsgSize(self, msgsize):
+        self.msgsize = msgsize
+     
+    def addApi(self, api):
+        self.api.append(api)
+    
+    def setPayload(self, payload):
+        self.payload = payload
+        
         
 
 class SBDHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        logging.info("Handling request")
-        payload = (self.server.fields, self.server.fmt)
+        logging.info("Handling request {}".format(self.server.reqnum))
         
         try:
-            self.data = self.request.recv(self.server.size)
-            self.data = SBDHandle(self.data, payload)
+            logging.info("Getting data")
+            self.data = self.request.recv(self.server.msgsize)
+            logging.debug(self.data)
+            
+            logging.info("Parcing data")
+            self.data = SBDHandle(self.data, self.server.payload)
+            logging.debug(self.data)
+            
+            logging.info("Sending data")
+            for api in self.server.api:
+                response = api(self.data, self.server.reqnum)
+                if response: logging.debug(response)
+                
         except Exception as e:
             logging.error(e)
-            return
-        else:
-            logging.info(self.data)
-        
-        headers = {"content-type": "application/json"}
-        payload = {
-            "method": self.server.method,
-            "params": self.data,
-            "jsonrpc": self.server.ver,
-            "id": self.server.reqnum,
-        }
-        try:
-            response = requests.post(self.server.url, data=json.dumps(payload), headers=headers).json()
-        except Exception as e:
-            logging.error(e)
-            return
-        else:
-            logging.info(response)
         
         self.server.reqnum += 1
         
-
+        logging.info("Done")
